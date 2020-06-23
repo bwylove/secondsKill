@@ -1,0 +1,95 @@
+wget https://dev.mysql.com/get/mysql57-community-release-el7-11.noarch.rpm
+yum -y localinstall mysql57-community-release-el7-11.noarch.rpm
+yum -y install mysql-community-server
+
+wdo.r-:K.9tx
+ALTER USER 'root'@'localhost' IDENTIFIED BY 'qwerty123456POIU0987@$&';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'qwerty123456POIU0987@$&' WITH GRANT OPTION;
+
+
+firewall-cmd --zone=public --add-port=3306/tcp --permanent
+firewall-cmd --zone=public --add-port=5672/tcp --permanent
+firewall-cmd --zone=public --add-port=15672/tcp --permanent
+yum -y install gcc glibc-devel make ncurses-devel openssl-devel xmlto perl wget gtk2-devel binutils-devel
+wget https://github.com/rabbitmq/rabbitmq-server/releases/download/v3.7.15/rabbitmq-server-generic-unix-3.7.15.tar.xz
+
+
+
+REDISPORT = 6379
+EXEC = /usr/local/bin/redis-server
+CLIEXEC = /usr/local/bin/redis-cli
+
+PIDFILE = /var/run/redis_${REDISPORT}.pid
+CONF = "/etc/redis/${REDISPORT}.conf"
+
+case  "$1"  in
+     start)
+         if  [  -f $PIDFILE ]
+         then
+                 echo  "$PIDFILE exists, process is already running or crashed"
+         else
+                 echo  "Starting Redis server..."
+                $EXEC $CONF
+         fi
+         ;;
+     stop)
+         if  [ ! -f $PIDFILE ]
+         then
+                 echo  "$PIDFILE does not exist, process is not running"
+         else
+                 PID = $(cat $PIDFILE)
+                 echo  "Stopping ..."
+                 $CLIEXEC  - p $REDISPORT shutdown
+                 while  [  - x  /proc/ ${PID} ]
+                 do
+                     echo  "Waiting for Redis to shutdown ..."
+                     sleep  1
+                 done
+                 echo  "Redis stopped"
+         fi
+         ;;
+     * )
+         echo  "Please use start or stop as first argument"
+         ;;
+esac
+
+
+
+
+#!/bin/bash
+#
+# chkconfig: 2345 80 05
+# description: rabbitmq
+# processname: rabbitmq
+
+#RabbitMQ安装目录
+RABBITMQ_HOME=/usr/local/rabbitmq
+export RABBITMQ_HOME
+
+case "$1" in
+    start)
+    echo "Starting RabbitMQ ..."
+	cd $RABBIT_HOME/sbin
+	rabbitmq-server
+    ;;
+stop)
+    echo "Stopping RabbitMQ ..."
+	cd $RABBIT_HOME/sbin
+    rabbitmqctl stop
+    ;;
+status)
+    echo "Status RabbitMQ ..."
+	cd $RABBIT_HOME/sbin
+    rabbitmqctl status
+    ;;
+restart)
+    echo "Restarting RabbitMQ ..."
+	cd $RABBIT_HOME/sbin
+    rabbitmq-server
+    ;;
+
+*)
+    echo "Usage: $prog {start|stop|status|restart}"
+    ;;
+esac
+exit 0
